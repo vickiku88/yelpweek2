@@ -45,11 +45,11 @@ class BusinessCell: UITableViewCell {
         YelpImageView.layer.cornerRadius = 3
         YelpImageView.clipsToBounds = true
         
-        BusinessLabel.preferredMaxLayoutWidth = BusinessLabel.frame.size.width
+        //BusinessLabel.preferredMaxLayoutWidth = BusinessLabel.frame.size.width
     }
     override func layoutSubviews() {
         super.layoutSubviews()
-        BusinessLabel.preferredMaxLayoutWidth = BusinessLabel.frame.size.width
+        //BusinessLabel.preferredMaxLayoutWidth = BusinessLabel.frame.size.width
     }
     
     override func setSelected(_ selected: Bool, animated: Bool) {
