@@ -12,27 +12,53 @@ import UIKit
    @objc optional func filtersViewController(filtersViewController: FiltersViewController, didUpdateFilters filters: [String:AnyObject])
 }
 
+enum CellSection : Int {
+    case deal = 0
+    case distances
+    case sort
+    case categories
+    case numberOfSections
+}
 
 
-
-class FiltersViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, SwitchCellDelegate, FiltersViewControllerDelegate {
+class FiltersViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, SwitchCellDelegate, FiltersViewControllerDelegate, DealCellDelegate {
 
     @IBOutlet weak var tableView: UITableView!
     weak var delegate : FiltersViewControllerDelegate?
     
     var categories : [[String:String]]!
+    var distances : [String:Int]!
     var switchState = [Int:Bool]()
+    let CellIdentifier = "TableViewCell", HeaderViewIdentifier = "TableViewHeaderView"
+   
+    var selectedSort = false
+    var isDealSelected = false
+    
+    var selectedDistance = "Auto"
+    var shouldDisplayAllDistances = false
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         // Do any additional setup after loading the view.
         categories = yelpCategories()
+        distances = yelpDistances()
+        
         tableView.delegate = self
         tableView.dataSource = self
         
+        //tableView.register(UITableViewCell.self, forCellReuseIdentifier: CellIdentifier)
+        //tableView.register(UITableViewHeaderFooterView.self, forHeaderFooterViewReuseIdentifier: HeaderViewIdentifier)
+        
+        
+        navigationController?.navigationBar.barTintColor = UIColor(red: 0.765, green: 0.141, blue: 0, alpha: 1);
+        navigationController?.navigationBar.isTranslucent = false;
+        navigationController?.navigationBar.tintColor = .white;
+        navigationController?.navigationBar.titleTextAttributes = [NSForegroundColorAttributeName: UIColor.white]
+        
     }
-
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
@@ -59,30 +85,120 @@ class FiltersViewController: UIViewController, UITableViewDataSource, UITableVie
             filters["categories"] = selectedCategories as AnyObject?
             print (filters)
         }
+        filters["distances"] = distances[selectedDistance] as AnyObject?
+        filters["deals"] = isDealSelected as AnyObject?
+        filters["sort"] = selectedSort as AnyObject?
+        print (filters)
+
         
         delegate?.filtersViewController?(filtersViewController: self, didUpdateFilters: filters)
 
     }
     public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return categories!.count
+        if section == 0 {
+            return 1
+        }
+        else if section == 1 {
+            return shouldDisplayAllDistances ? (distances.count + 1) : 1
+            //return 1
+        }
+        else if section == 2 {
+            return selectedSort ? (3) : 1
+        }
+        else if section == 3 {
+            return categories.count
+        }
+        return 1
+    
     }
+    
+    public func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        
+        switch CellSection(rawValue : section) {
+        case CellSection.deal? :
+            return "Offering a deal"
+        case CellSection.distances? :
+            return "Distances"
+        case CellSection.sort? :
+            return "Sort"
+        case CellSection.categories? :
+            return "Categories"
+        default : return nil
+        }
+        /*
+        if section == CellSection.deal {
+            return "Offering a deal"
+        }
+        else if section == CellSection.distances {
+        }
+        else if section == CellSection.sort {
+            return "Sort"
+        }
+        else if section == CellSection.categories {
+            return "Categories"
+        }
+        return nil*/
+    
+    }
+    public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if indexPath.section == 0 {
+        }
+        else if indexPath.section == 1 {
+            
+            shouldDisplayAllDistances = !shouldDisplayAllDistances
+            tableView.reloadSections(IndexSet([indexPath.section]), with: .automatic)
+            
+        }
+        else if indexPath.section == 2 {
+            selectedSort = !selectedSort
+            tableView.reloadSections(IndexSet([indexPath.section]), with: .automatic)
+            
+        }
+        else if indexPath.section == 3 {
+        }
+    }
+    
+    public func numberOfSections(in tableView: UITableView) -> Int {
+        return CellSection.numberOfSections.rawValue
+    }
+    
   
     
-    @available(iOS 2.0, *)
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell{
-        let cell = tableView.dequeueReusableCell(withIdentifier: "SwitchCell", for: indexPath) as! SwitchCell
-        cell.switchLabel.text = categories[indexPath.row]["name"]
-        cell.delegate = self
         
-        /*if switchState[indexPath.row] != nil {
-            cell.onSwitch.isOn = switchState[indexPath.row]!
-        } else {
-            cell.onSwitch.isOn = false
-        }*/
-        //short hand value is as follows:
-         cell.onSwitch.isOn = switchState[indexPath.row] ?? false
-        return cell
-
+        
+        if indexPath.section == 0 {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "DealCell", for: indexPath) as! DealCell
+            cell.delegate = self
+            return cell
+        }
+        else if indexPath.section == 1 {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "DistanceCell", for: indexPath) as! DistanceCell
+            var text = String()
+            if indexPath.row == 0 {
+                text = selectedDistance
+            } else {
+                //text = distancesKeys[indexPath.row - 1]
+            }
+            cell.distanceLabel.text = text
+            return cell
+        }
+        else if indexPath.section == 2 {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "SortCell", for: indexPath) as! SortCell
+            //cell.delegate = self
+            return cell
+        }
+        else {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "SwitchCell", for: indexPath) as! SwitchCell
+            cell.switchLabel.text = categories[indexPath.row]["name"]
+            cell.delegate = self
+            
+            cell.onSwitch.isOn = switchState[indexPath.row] ?? false
+            return cell
+        }
+        
+        
+        
     }
     
     func switchCell(switchCell: SwitchCell, didChangeValue value: Bool) {
@@ -94,8 +210,15 @@ class FiltersViewController: UIViewController, UITableViewDataSource, UITableVie
         print ( switchState)
     }
 
-    
-    
+    ///////////////////////////////////////////
+    func yelpDistances() -> [String: Int] {
+        return [
+            " 2 blocks": 160,
+            " 6 blocks": 482,
+            " 1 mile": 1609,
+            " 5 miles": 8046
+        ]
+    }
     
     func yelpCategories() -> [[String : String]] {return [["name" : "Afghan", "code": "afghani"],
                       ["name" : "African", "code": "african"],

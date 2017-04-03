@@ -17,7 +17,10 @@ class BusinessesViewController: UIViewController, UITableViewDelegate, UITableVi
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        navigationController?.navigationBar.barTintColor = .red
+        navigationController?.navigationBar.barTintColor = UIColor(red: 0.765, green: 0.141, blue: 0, alpha: 1);
+        navigationController?.navigationBar.isTranslucent = false;
+        navigationController?.navigationBar.tintColor = .white;
+        navigationController?.navigationBar.titleTextAttributes = [NSForegroundColorAttributeName: UIColor.white]
 
         searchBar = UISearchBar()
         searchBar.sizeToFit()
@@ -83,12 +86,12 @@ class BusinessesViewController: UIViewController, UITableViewDelegate, UITableVi
      // MARK: - Navigation
      
      // In a storyboard-based application, you will often want to do a little preparation before navigation
-      func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         let navigationController = segue.destination as! UINavigationController
         let filtersViewController = navigationController.topViewController as! FiltersViewController
         filtersViewController.delegate = self
-        
-     }
+    }
+      
     
     func filtersViewController(filtersViewController: FiltersViewController, didUpdateFilters filters: [String : AnyObject]) {
         
@@ -96,7 +99,7 @@ class BusinessesViewController: UIViewController, UITableViewDelegate, UITableVi
         Business.searchWithTerm(term: "Restaurants", sort: nil, categories: categories, deals: nil) { (businesses: [Business]?, error: Error?) -> Void in
             self.businesses = businesses
             self.tableView.reloadData()
-            print("reload")
+            //print("reload")
         }
     }
 }
