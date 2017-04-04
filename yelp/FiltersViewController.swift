@@ -84,12 +84,11 @@ class FiltersViewController: UIViewController, UITableViewDelegate, UITableViewD
         if selectedCategories.count > 0 {
             
             filters["categories"] = selectedCategories as AnyObject?
-            print (filters)
         }
         filters["distances"] = distances[selectedDistance] as AnyObject?
         filters["deals"] = isDealSelected as AnyObject?
         filters["sort"] = selectedSort as AnyObject?
-        //print (filters)
+        print (filters)
 
         
         delegate?.filtersViewController?(filtersViewController: self, didUpdateFilters: filters)
@@ -235,7 +234,10 @@ class FiltersViewController: UIViewController, UITableViewDelegate, UITableViewD
         print(isDealSelected)
         
     }
-    
+    func sortCell(sortCell: SortCell, didChangeValue value: Int) {
+        selSortBy = String(value)
+        print(value)
+    }
     func switchCell(switchCell: SwitchCell, didChangeValue value: Bool) {
         let indexPath = tableView.indexPath(for: switchCell)!
         switchState[indexPath.row] = value

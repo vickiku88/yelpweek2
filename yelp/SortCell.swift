@@ -18,13 +18,19 @@ class SortCell: UITableViewCell {
     @IBOutlet weak var sortLabel: UILabel!
     weak var delegate : SortCellDelegate?
     
+    weak var sortSegmentControl: UISegmentedControl?
+    
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
+        
+        sortSegmentControl?.addTarget(self, action: #selector(SortCell.segmentValueChanged), for: UIControlEvents.valueChanged)
 
     }
-    
-    
+    func segmentValueChanged() {
+        delegate?.sortCell!(sortCell: self, didChangeValue: ((sortSegmentControl?.selectedSegmentIndex) != nil))
+        
+    }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
