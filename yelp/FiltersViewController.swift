@@ -21,7 +21,7 @@ enum CellSection : Int {
 }
 
 
-class FiltersViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, SwitchCellDelegate, FiltersViewControllerDelegate, DealCellDelegate {
+class FiltersViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, SwitchCellDelegate, FiltersViewControllerDelegate, DealCellDelegate, SortCellDelegate {
 
     @IBOutlet weak var tableView: UITableView!
     weak var delegate : FiltersViewControllerDelegate?
@@ -30,8 +30,9 @@ class FiltersViewController: UIViewController, UITableViewDelegate, UITableViewD
     var distances : [String:Int]!
     var switchState = [Int:Bool]()
     let CellIdentifier = "TableViewCell", HeaderViewIdentifier = "TableViewHeaderView"
-   
+    var sortby : [Int:String]!
     var selectedSort = false
+    var selSortBy = "Sort by"
     var isDealSelected = false
     
     var selectedDistance = "Auto"
@@ -44,7 +45,7 @@ class FiltersViewController: UIViewController, UITableViewDelegate, UITableViewD
         // Do any additional setup after loading the view.
         categories = yelpCategories()
         distances = yelpDistances()
-        
+        sortby = yelpSort()
         tableView.delegate = self
         tableView.dataSource = self
         
@@ -88,7 +89,7 @@ class FiltersViewController: UIViewController, UITableViewDelegate, UITableViewD
         filters["distances"] = distances[selectedDistance] as AnyObject?
         filters["deals"] = isDealSelected as AnyObject?
         filters["sort"] = selectedSort as AnyObject?
-        print (filters)
+        //print (filters)
 
         
         delegate?.filtersViewController?(filtersViewController: self, didUpdateFilters: filters)
@@ -103,7 +104,7 @@ class FiltersViewController: UIViewController, UITableViewDelegate, UITableViewD
             //return 1
         }
         else if section == 2 {
-            return selectedSort ? (3) : 1
+            return selectedSort ? (4) : 1
         }
         else if section == 3 {
             return categories.count
@@ -142,14 +143,29 @@ class FiltersViewController: UIViewController, UITableViewDelegate, UITableViewD
     }
     public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if indexPath.section == 0 {
+           
         }
         else if indexPath.section == 1 {
             
+
+            if shouldDisplayAllDistances == true {
+                if indexPath.row != 0 {
+                    let row = indexPath.row
+                    let distancesKeys = Array(distances.keys)
+                    selectedDistance = distancesKeys[row-1]
+                }
+            }
             shouldDisplayAllDistances = !shouldDisplayAllDistances
             tableView.reloadSections(IndexSet([indexPath.section]), with: .automatic)
-            
+
         }
         else if indexPath.section == 2 {
+            if selectedSort == true {
+                if indexPath.row != 0 {
+                selSortBy = sortby[indexPath.row-1]!
+                }
+            }
+            
             selectedSort = !selectedSort
             tableView.reloadSections(IndexSet([indexPath.section]), with: .automatic)
             
@@ -178,26 +194,45 @@ class FiltersViewController: UIViewController, UITableViewDelegate, UITableViewD
             if indexPath.row == 0 {
                 text = selectedDistance
             } else {
-                //text = distancesKeys[indexPath.row - 1]
+                let row = indexPath.row
+                let distancesKeys = Array(distances.keys)
+                text = distancesKeys[row-1]
+            
             }
             cell.distanceLabel.text = text
             return cell
         }
         else if indexPath.section == 2 {
             let cell = tableView.dequeueReusableCell(withIdentifier: "SortCell", for: indexPath) as! SortCell
-            //cell.delegate = self
+            cell.delegate = self
+            var text = String()
+            if indexPath.row == 0 {
+                text = selSortBy
+            } else {
+                let row = indexPath.row
+                text = sortby[row-1]!
+                
+            }
+            
+            cell.sortLabel.text = text
             return cell
         }
         else {
             let cell = tableView.dequeueReusableCell(withIdentifier: "SwitchCell", for: indexPath) as! SwitchCell
             cell.switchLabel.text = categories[indexPath.row]["name"]
             cell.delegate = self
-            
             cell.onSwitch.isOn = switchState[indexPath.row] ?? false
             return cell
         }
         
         
+        
+    }
+    func dealCell(dealCell: DealCell, didChangeValue value: Bool) {
+        /// make a request, value would be given either to on or off
+        tableView.reloadData()
+        isDealSelected = value
+        print(isDealSelected)
         
     }
     
@@ -209,6 +244,9 @@ class FiltersViewController: UIViewController, UITableViewDelegate, UITableViewD
         print (indexPath.row, value)
         print ( switchState)
     }
+    
+    
+    
 
     ///////////////////////////////////////////
     func yelpDistances() -> [String: Int] {
@@ -217,6 +255,14 @@ class FiltersViewController: UIViewController, UITableViewDelegate, UITableViewD
             " 6 blocks": 482,
             " 1 mile": 1609,
             " 5 miles": 8046
+        ]
+    }
+    
+    func yelpSort () -> [Int:String] {
+        return [
+            0: "Best Match",
+            1:  "Distance",
+            2:  "Highest Rated"
         ]
     }
     

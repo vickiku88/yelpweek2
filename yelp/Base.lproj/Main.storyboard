@@ -218,6 +218,9 @@
                                                 </label>
                                             </subviews>
                                         </tableViewCellContentView>
+                                        <connections>
+                                            <outlet property="sortLabel" destination="51V-LG-yTs" id="mCN-AF-vU9"/>
+                                        </connections>
                                     </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="SwitchCell" rowHeight="72" id="8NV-43-c7R" customClass="SwitchCell" customModule="yelp" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="244" width="375" height="72"/>

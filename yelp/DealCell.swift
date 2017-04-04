@@ -8,7 +8,7 @@
 
 import UIKit
 @objc protocol DealCellDelegate {
-    @objc optional func dealCell(dealCell: DealCell, didChangeValue value: Bool)
+    @objc func dealCell(dealCell: DealCell, didChangeValue value: Bool)
 }
 class DealCell: UITableViewCell {
 
@@ -26,7 +26,7 @@ class DealCell: UITableViewCell {
     }
     
     func switchValueChanged() {
-        delegate?.dealCell!(dealCell: self, didChangeValue: dealSwitch.isOn)
+        delegate?.dealCell(dealCell: self, didChangeValue: dealSwitch.isOn)
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
